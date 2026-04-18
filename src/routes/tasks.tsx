@@ -408,11 +408,12 @@ function TaskDetailDialog({
     if (!user) return;
     setSaving(true);
     const newStatus = progress >= 100 ? "done" : progress > 0 ? "in_progress" : task.status;
-    const updates: Record<string, unknown> = { progress, status: newStatus };
-    if (newStatus === "done" && !task.completed_at) {
-      updates.completed_at = new Date().toISOString();
-    }
-    const { error } = await supabase.from("tasks").update(updates).eq("id", task.id);
+    const completed_at =
+      newStatus === "done" && !task.completed_at ? new Date().toISOString() : task.completed_at;
+    const { error } = await supabase
+      .from("tasks")
+      .update({ progress, status: newStatus, completed_at })
+      .eq("id", task.id);
     if (!error) {
       await logActivity(
         task.id,
